@@ -1,15 +1,29 @@
-import { Text, View, StyleSheet, FlatList, Image, Button, ScrollView } from "react-native";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
-import { MarkerType } from "@/types";
+import { Text, View, StyleSheet, FlatList, Image, Button, Alert } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ImageData } from "@/types";
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import { useDatabase } from "@/contexts/DatabaseContext";
 export default function MarkerDetail() {
   const router = useRouter();
-  const { jmarker } = useLocalSearchParams<{ jmarker: string }>()
-  const marker: MarkerType = JSON.parse(jmarker)
-  const [localImages, setLocalImages] = useState<string[]>(marker.images)
-  // const [marker, setMarker]=useState<MarkerType>()
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [localImages, setLocalImages] = useState<ImageData[]>([])
+  const { getMarkerImages, addImage, deleteImage, deleteMarker } = useDatabase();
+
+  useEffect(() => {
+    const loadImages = async () => {
+      try {
+        const images = await getMarkerImages(Number(id));
+        setLocalImages(images);
+      }
+      catch (error) {
+        Alert.alert('Не удалось загрузить изображения')
+      }
+    };
+    loadImages();
+  }, [id]
+  );
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -19,43 +33,53 @@ export default function MarkerDetail() {
     });
 
     if (!result.canceled) {
-      const encode=encodeURIComponent(result.assets[0].uri)
-      const newImage = [...localImages, encode];
-      setLocalImages(newImage)
+
+      await addImage(Number(id), result.assets[0].uri)
+      setLocalImages(await getMarkerImages(Number(id)))
     }
-    else{
+    else {
       alert('Фото не выбрано');
     }
   };
-  const deleteImage = (id: number) => {
-    const newImages = localImages.filter((_, i) => i !== id);
-    setLocalImages(newImages);
+
+  const handledeleteImage = async (image_id: number,id:number) => {
+    try{
+      await deleteImage(image_id);
+      const newImages = localImages.filter((_, i) => i !== id);
+      setLocalImages(newImages);
+    }
+    catch(error) {
+      Alert.alert('error','Не удалось удалить фото')
+    }
   };
-  const Back = () => {
-    const updatedMarker = {
-      id: marker.id,
-      coordinate: marker.coordinate,
-      images: localImages,
-    };
-    
-    router.back();
-    router.setParams({ updatedMarker: JSON.stringify(updatedMarker) })
-  }
+  
+  const handleDeleteMarker = async ()=>{
+    try{
+      await deleteMarker(Number(id));
+
+      router.back();
+      router.setParams({ refresh: 'true' });
+    }
+    catch(error){
+      Alert.alert('error', 'Не удалось удалить маркер')
+    }
+  };
 
   return (
-    console.log( localImages),
+    console.log(id),
+    console.log(localImages),
 
     <View style={styles.container}>
-       <Text>Координаты: {marker.coordinate.latitude}, {marker.coordinate.longitude}</Text>
-      <Button title="Сохранить изображения" onPress={Back} />
+      
+      <Button title="Delete marker" onPress={handleDeleteMarker} />
       <Button title="Add Image" onPress={pickImage} />
+      
       <FlatList
         data={localImages}
-        keyExtractor={(index) => index}
         renderItem={({ item,index }) => (
           <View style={styles.imageContainer}>
-            <Image source={{ uri: decodeURIComponent(item) }} style={styles.image} />
-            <Button title="Delete" onPress={() => deleteImage(index)} />
+            <Image source={{ uri: (item.uri) }} style={styles.image} />
+            <Button title="Delete" onPress={() => handledeleteImage(Number(item.id),index)} />
           </View>
         )}
       />

@@ -1,14 +1,12 @@
-export interface MarkerType {
+export interface MarkerData {
     id: string;
-    coordinate: {
-        latitude: number;
-        longitude: number;
-    };
-    images: string[];
+    latitude: number;
+    longitude: number;
+    date: string;
 };
 
-interface Image {
+export interface ImageData {
     id: string;
-    id_m: number;
-    uri: string[];
+    marker_id: number;
+    uri: string;
 }

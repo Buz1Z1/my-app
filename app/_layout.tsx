@@ -1,13 +1,13 @@
 import { Stack } from "expo-router";
-import Map from "@/components/Map";
-import MarkerDetail from "./marker/[id]";
-
+import { DatabaseProvider } from '../contexts/DatabaseContext';
 export default function RootLayout() {
   return (
-  <Stack>
-    <Stack.Screen name="Map" options={{title: 'Map'}}/>
-    <Stack.Screen name="MarkerDetail" options={{title: 'Marker'}}/>
-  </Stack>
+    <DatabaseProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{ title: 'Карта' }} />
+        <Stack.Screen name="marker/[id]" options={{ title: 'Детали маркера' }} />
+      </Stack>
+    </DatabaseProvider>
   )
 }
 
