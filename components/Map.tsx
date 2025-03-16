@@ -8,7 +8,7 @@ import { useDatabase } from '../contexts/DatabaseContext';
 const Map = () => {
     const [markers, setMarkers] = useState<MarkerData[]>([]);
     const router = useRouter();
-    const { getMarkers, addMarker,isLoading } = useDatabase();
+    const { getMarkers, addMarker, isLoading } = useDatabase();
     const params = useLocalSearchParams<{ refresh: string }>();
     const loadMarkers = async () => {
         try {
@@ -46,7 +46,7 @@ const Map = () => {
         router.push(`/marker/${marker.id}`)
     }
     return (
-        console.log('Кол-во маркеров: ', (markers)),
+        // console.log('маркеры: ', (markers)),
         <View style={styles.container}>
             <MapView style={styles.map}
                 initialRegion={{

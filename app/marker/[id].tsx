@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, FlatList, Image, Button, Alert } from "react-native";
+import { Text, View, StyleSheet, FlatList, Image, Button, Alert, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ImageData } from "@/types";
 import * as ImagePicker from 'expo-image-picker';
@@ -70,16 +70,21 @@ export default function MarkerDetail() {
     console.log(localImages),
 
     <View style={styles.container}>
-      
-      <Button title="Delete marker" onPress={handleDeleteMarker} />
-      <Button title="Add Image" onPress={pickImage} />
-      
+      <TouchableOpacity onLongPress={handleDeleteMarker} style={styles.delete}>
+        <Text style={styles.ButtonText}>Удалить маркер</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={pickImage} style={styles.add}>
+        <Text style={styles.ButtonText}>Добавить фото</Text>
+      </TouchableOpacity>
       <FlatList
         data={localImages}
         renderItem={({ item,index }) => (
           <View style={styles.imageContainer}>
             <Image source={{ uri: (item.uri) }} style={styles.image} />
-            <Button title="Delete" onPress={() => handledeleteImage(Number(item.id),index)} />
+            <TouchableOpacity onPress={() => handledeleteImage(Number(item.id),index)} style={styles.delete}>
+              <Text style={styles.ButtonText}>Удалить фото</Text>
+            </TouchableOpacity>
+            
           </View>
         )}
       />
@@ -102,6 +107,31 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 200,
-    marginBottom: 8,
+    marginInline: 10,
   },
+  delete: {
+    backgroundColor: "#940000",
+    borderRadius: 10,
+    margin: 5,
+    padding:10
+  },
+  deleteim:{
+    backgroundColor: "#940000",
+    borderRadius: 10,
+    margin: 5,
+    padding:10
+  },
+  add:{
+    backgroundColor: "#009900",
+    borderRadius: 10,
+    margin: 5,
+    padding:10
+  },
+  ButtonText: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "bold",
+    alignSelf: "center",
+    textTransform: "uppercase"
+  }
 });
